@@ -1,50 +1,16 @@
 import './style.css'
 import { Application, Container, Graphics, Text } from 'pixi.js'
+import { Reel } from './game/Reel'
+import { isWinningLine } from './game/Paylines'
+import {
+  AVAILABLE_SYMBOLS,
+  BET,
+  INITIAL_BALANCE,
+  SPIN_DURATION,
+  WIN_MULTIPLIER,
+} from './game/config'
 
-function createSymbol(label: string, color: number){
-  const symbol = new Container()
-    const background = new Graphics()
-    .roundRect(-70, -70, 140, 140, 16)
-    .fill(color)
-    .stroke({
-      color: 0xffffff,
-      width: 3,
-    }) 
-    const text = new Text({
-      text: label,
-          style: {
-      fontSize: 64,
-    },
-    })
-      text.anchor.set(0.5)
-     symbol.addChild(background)
-  symbol.addChild(text)
 
-  return symbol
-}
-
-class Reel extends Container {
-  symbolsContainer = new Container()
-  constructor(labels: string[]){
-
-    super()
-
-        this.addChild(this.symbolsContainer)
-
-    labels.forEach((label, index) => {
-      const symbol = createSymbol(label, 0x45475a)
-      symbol.y = index * 125
-      this.symbolsContainer.addChild(symbol)
-    })
-
-    const reelMask = new Graphics()
-      .rect(-74, -74, 148, 398)
-      .fill(0xffffff)
-    this.addChild(reelMask)
-    this.symbolsContainer.mask = reelMask
-
-  }
-}
 
 async function main() {
   const app = new Application()
@@ -76,9 +42,9 @@ const title = new Text({
 })
 title.anchor.set(0.5)
 title.position.set(400, 55)
-let balance = 100
-const bet = 10
-let winAmount = 0
+let balance = INITIAL_BALANCE
+const bet = BET
+let winAmount = BET * WIN_MULTIPLIER
 const balanceText = new Text({
   text: `Balance: ${balance}`,
   style: {
@@ -158,14 +124,13 @@ spinButton.cursor = 'pointer'
 
 gameScene.addChild(spinButton)
 
-const availableSymbols = ['🍒']
 let isSpinning = false
 let winEffectTime = 0
 
 app.ticker.add((ticker) => {
   if (isSpinning) {
     reels.forEach((reel) => {
-      reel.symbolsContainer.children.forEach((symbol) => {
+      reel.symbols.forEach((symbol) => {
         symbol.y += 900 * (ticker.deltaMS / 1000)
 
         if (symbol.y > 250) {
@@ -241,22 +206,18 @@ reels.forEach((reel) => {
 reels.forEach((reel) => {
   const reelResult: string[] = []
 
-  reel.symbolsContainer.children.forEach((symbol, index) => {
+  reel.symbols.forEach((symbol, index) => {
     symbol.y = index * 125
 
     const randomIndex = Math.floor(
-      Math.random() * availableSymbols.length,
+      Math.random() * AVAILABLE_SYMBOLS.length,
     )
 
-    const randomSymbol = availableSymbols[randomIndex]
+    const randomSymbol = AVAILABLE_SYMBOLS[randomIndex]
 
     reelResult.push(randomSymbol)
 
-    const text = symbol.children[1]
-
-    if (text instanceof Text) {
-      text.text = randomSymbol
-    }
+    symbol.setLabel(randomSymbol)
   })
 
   result.push(reelResult)
@@ -267,9 +228,8 @@ reels.forEach((reel) => {
 
 const middleLine = result.map((reel) => reel[1])
 
-const isWin = middleLine.every(
-  (symbol) => symbol === middleLine[0],
-)
+const isWin = isWinningLine(middleLine)
+
 if (isWin) {
   winAmount = bet * 5
   balance += winAmount
@@ -291,9 +251,10 @@ if (isWin) {
 }
 
 resultText.text = `Line: ${middleLine.join(' | ')}`
-  }, 1000)
+  }, SPIN_DURATION)
 })
 
 document.body.appendChild(app.canvas)
 }
 main()
+
