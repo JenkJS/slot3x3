@@ -80,7 +80,7 @@ let balance = 100
 const bet = 10
 let winAmount = 0
 const balanceText = new Text({
-  text: `Баланс: ${balance}`,
+  text: `Balance: ${balance}`,
   style: {
     fill: 0xa6e3a1,
     fontSize: 20,
@@ -92,7 +92,7 @@ balanceText.position.set(150, 55)
 gameScene.addChild(balanceText)
 
 const betText = new Text({
-  text: `Ставка: ${bet}`,
+  text: `Bet: ${bet}`,
   style: {
     fill: 0x89b4fa,
     fontSize: 20,
@@ -106,7 +106,7 @@ gameScene.addChild(betText)
 gameScene.addChild(title)
 
 const resultText = new Text({
-  text: 'Линия: —',
+  text: 'Line: —',
   style: {
     fill: 0xa6adc8,
     fontSize: 18,
@@ -224,7 +224,7 @@ spinButton.on('pointerdown', () => {
   balance -= bet
   winAmount = 0
 
-  balanceText.text = `Баланс: ${balance}`
+  balanceText.text = `Balance: ${balance}`
   middlePayline.visible = false
   winEffectTime = 0
 
@@ -276,7 +276,7 @@ if (isWin) {
     winEffectTime = 1000
 }
 
-balanceText.text = `Баланс: ${balance}`
+balanceText.text = `Balance: ${balance}`
 
 middlePayline.visible = isWin
 
@@ -286,11 +286,11 @@ if (isWin) {
 
   resultText.style.fill = 0xf9e2af
 } else {
-  resultText.text = `Линия: ${middleLine.join(' | ')}`
+  resultText.text = `Line: ${middleLine.join(' | ')}`
   resultText.style.fill = 0xa6adc8
 }
 
-resultText.text = `Линия: ${middleLine.join(' | ')}`
+resultText.text = `Line: ${middleLine.join(' | ')}`
   }, 1000)
 })
 
